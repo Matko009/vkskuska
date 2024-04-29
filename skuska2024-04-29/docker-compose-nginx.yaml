@@ -1,0 +1,21 @@
+version: '3.8'
+
+networks:
+  vk-api:
+
+services:
+  vk-php:
+    build: 
+      context: .
+      dockerfile: config/docker/Dockerfile.dockerfile
+    image: martinkratky/skuska01
+    container_name: vkphp01
+    expose:
+      - 9000
+    networks:
+      - vk-api
+    volumes:
+      - ./src:/var/www/html
+
+volumes:
+  vk-dbdata:

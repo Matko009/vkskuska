@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: skuska
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      volumes:
+        - name: shared-files
+          emptyDir: {}
+        - name: nginx-config-volume
+          configmap:
+            - name: nginx-config
+              defaultMode: 420
+      containers:
+      - name: vk-php
+        image: martinkratky/skuska01
+        imagePullPolicy: Always
+        command: 
+          - /usr/local/sbin/php-fpm
+        ports:
+          - name: http
+            protocol: TCP
+            container_port: 9000
+        volumeMounts:
+          - name: shared-files
+            mountPath: /var/www/html
+        lifecycle:
+          postStart:
+            exec:
+              command: 
+                - ["/sbin/sh", "-c", "sp -r /var/www/app/. /var/www/html"]
+      - name: nginx
+        image: library/nginx:1.20.1
+        imagePullPolicy: Always
+        command: 
+          - /usr/sbin/nginx
+          - "-g"
+          - "daemon off";
+        ports:
+          - name: http
+            protocol: TCP
+            containerPort: 80
+        lifecycle:
+          preStart:
+            exec:
+              command: /usr/sbin/nginx
+        volumeMounts:
+          - name: shared-files
+            mountPath: /var/www/html
+          - name: nginx-config-volume
+            mountPath: /ect/nginx/conf.d/default.conf
+            subPath: defaul.conf

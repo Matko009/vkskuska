@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: skuska
+spec:
+  selector:
+    app: nginx
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 31123
+  clusterIP: 10.102.254.11
+  externalTrafficPolicy: cluster
+  type: NodePort
+  sessionAffinity: None
